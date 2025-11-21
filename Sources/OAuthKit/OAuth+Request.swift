@@ -144,10 +144,15 @@ extension OAuth {
         static func device(provider: Provider) -> URLRequest? {
             guard let deviceCodeURL = provider.deviceCodeURL,
                   var urlComponents = URLComponents(string: deviceCodeURL.absoluteString) else { return nil }
+			
             urlComponents.queryItems = buildQueryItems(provider: provider, grantType: .deviceCode)
-            guard let url = urlComponents.url else { return nil }
+			let query = urlComponents.query ?? ""
+			urlComponents.queryItems = nil
+            
+			guard let url = urlComponents.url else { return nil }
             var request = URLRequest(url: url)
             request.httpMethod = httpPost
+            request.httpBody = query.data(using: .utf8)
             request.setValue(jsonMimeType, forHTTPHeaderField: httpAcceptHeaderField)
             return request
         }
