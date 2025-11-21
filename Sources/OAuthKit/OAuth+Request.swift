@@ -103,11 +103,14 @@ extension OAuth {
         ///   - deviceCode: the device code data
         /// - Returns: a  `/token` request that can be used for polling
         static func token(provider: Provider, deviceCode: DeviceCode) -> URLRequest? {
-            guard var urlComponents = URLComponents(string: provider.accessTokenURL.absoluteString) else { return nil }
+            var urlComponents = URLComponents()
             urlComponents.queryItems = buildQueryItems(provider: provider, deviceCode: deviceCode)
+            let body = urlComponents.query ?? ""
+
             guard let url = urlComponents.url else { return nil }
-            var request = URLRequest(url: url)
+            var request = URLRequest(url: provider.accessTokenURL)
             request.httpMethod = httpPost
+            request.httpBody = body.data(using: .utf8)
             request.setValue(jsonMimeType, forHTTPHeaderField: httpAcceptHeaderField)
             return request
         }
@@ -142,17 +145,16 @@ extension OAuth {
         ///   - provider: the oauth provider
         /// - Returns: the url request
         static func device(provider: Provider) -> URLRequest? {
-            guard let deviceCodeURL = provider.deviceCodeURL,
-                  var urlComponents = URLComponents(string: deviceCodeURL.absoluteString) else { return nil }
-			
+            guard let deviceCodeURL = provider.deviceCodeURL else { return nil }
+
+            var urlComponents = URLComponents()
             urlComponents.queryItems = buildQueryItems(provider: provider, grantType: .deviceCode)
-			let query = urlComponents.query ?? ""
-			urlComponents.queryItems = nil
+            let body = urlComponents.query ?? ""
             
-			guard let url = urlComponents.url else { return nil }
-            var request = URLRequest(url: url)
+            guard let url = urlComponents.url else { return nil }
+            var request = URLRequest(url: deviceCodeURL)
             request.httpMethod = httpPost
-            request.httpBody = query.data(using: .utf8)
+            request.httpBody = body.data(using: .utf8)
             request.setValue(jsonMimeType, forHTTPHeaderField: httpAcceptHeaderField)
             return request
         }
