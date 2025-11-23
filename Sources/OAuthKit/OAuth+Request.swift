@@ -55,13 +55,14 @@ extension OAuth {
         ///   - token: the auth token to refresh
         /// - Returns: an `/authorization` url request
         static func refresh(provider: Provider, token: Token) -> URLRequest? {
-            guard var urlComponents = URLComponents(string: provider.authorizationURL.absoluteString) else { return nil }
             guard let queryItems = buildQueryItems(provider: provider, token: token) else { return nil }
+            var urlComponents = URLComponents()
             urlComponents.queryItems = queryItems
-            guard let url = urlComponents.url else { return nil }
+            let body = urlComponents.query
 
-            var request = URLRequest(url: url)
+            var request = URLRequest(url: provider.authorizationURL)
             request.httpMethod = httpPost
+            request.httpBody = body?.data(using: .utf8)
             request.setValue(jsonMimeType, forHTTPHeaderField: httpAcceptHeaderField)
             return request
         }
