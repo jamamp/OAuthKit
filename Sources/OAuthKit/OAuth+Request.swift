@@ -60,7 +60,7 @@ extension OAuth {
             urlComponents.queryItems = queryItems
             let body = urlComponents.query
 
-            var request = URLRequest(url: provider.authorizationURL)
+            var request = URLRequest(url: provider.accessTokenURL)
             request.httpMethod = httpPost
             request.httpBody = body?.data(using: .utf8)
             request.setValue(jsonMimeType, forHTTPHeaderField: httpAcceptHeaderField)
